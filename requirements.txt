@@ -1,0 +1,16 @@
+# requirements.txt
+# Agentic Squad - Dependencias
+
+# Framework de Agentes
+crewai
+
+# LLM Local via Ollama
+ollama
+langchain-ollama
+
+# Utilitarios
+python-dotenv
+pydantic
+
+# Para salvar e ler arquivos
+markdo
