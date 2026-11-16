@@ -1,20 +1,26 @@
 # main.py
-# Teste do Agente PO com LLM Local via Ollama
+# Teste da Squad (PO + Scrum Master) com LLM Local via Ollama
 # Rode: python main.py
 #
 # Fluxo:
 #   ideia -> validacao de entrada -> checagem de tamanho
-#         -> DESCOBERTA (guardrail) -> BACKLOG (guardrail) -> output/backlog_po.md
+#         -> DESCOBERTA (guardrail) -> BACKLOG (guardrail)      [PO]
+#         -> TAREFAS (guardrail)    -> SPRINT (guardrail)       [Scrum Master]
+#         -> output/squad.md
 
 import os
 from crewai import Crew, Task, LLM
 from agents.po_agent import create_po_agent, DISCOVERY_PROMPT, BACKLOG_PROMPT
+from agents.scrum_agent import create_scrum_agent, TASKS_PROMPT, SPRINT_PROMPT
 from configs.guardrails import (
     validar_ideia,
     checar_tamanho_prompt,
     guardrail_descoberta,
     guardrail_backlog,
+    guardrail_tarefas,
+    guardrail_sprint,
 )
+
 from ui_server import iniciar_sala, observar_guardrail
 # 1. CONFIGURA O LLM LOCAL
 # Certifique-se que voce ja rodou no terminal:
@@ -32,6 +38,13 @@ llm = LLM(
 )
 
 IDEIA_PADRAO = "App de controle de gastos pessoais com categorias e relatorios mensais"
+
+# [SALA] Depois que cada etapa e aprovada: mensagem do diario e proxima etapa
+PROXIMA_ETAPA = {
+    "descoberta": ("Funcionalidades aprovadas. Começando as user stories.", "backlog"),
+    "backlog": ("Backlog aprovado. Scrum Master quebrando em tarefas.", "tarefas"),
+    "tarefas": ("Tarefas aprovadas. Montando as sprints.", "sprint"),
+}
 
 
 def pedir_ideia() -> str:
@@ -55,7 +68,7 @@ def esperar_enter():
 
 def main():
     print("=" * 60)
-    print("AGENTIC SQUAD - TESTE DO PO")
+    print("AGENTIC SQUAD - TESTE DO PO + SCRUM MASTER")
     print("LLM Local: Ollama + Llama 3.2")
     print("=" * 60)
     print("")
@@ -67,10 +80,14 @@ def main():
     idea = pedir_ideia()
     descricao_descoberta = DISCOVERY_PROMPT.format(idea=idea)
     descricao_backlog = BACKLOG_PROMPT.format(idea=idea)
+    descricao_tarefas = TASKS_PROMPT.format(idea=idea)
+    descricao_sprint = SPRINT_PROMPT.format(idea=idea)
 
     try:
         checar_tamanho_prompt(descricao_descoberta)
         checar_tamanho_prompt(descricao_backlog)
+        checar_tamanho_prompt(descricao_tarefas)
+        checar_tamanho_prompt(descricao_sprint)
     except ValueError as erro:
         print(f"\n{erro}")
         sala.publicar(str(erro), tipo="erro", estado="erro", ideia=idea)
@@ -82,10 +99,12 @@ def main():
         estado="pensando", etapa="descoberta", ideia=idea, tentativa=0, motivo="",
     )
 
-    # 3. CRIA O AGENTE PO
+    # 3. CRIA OS AGENTES
     po_agent = create_po_agent(llm)
+    scrum_agent = create_scrum_agent(llm)
 
     # 4. CRIA AS TAREFAS (prompt chaining)
+    # --- PO ---
     descoberta_task = Task(
         description=descricao_descoberta,
         expected_output="Visao do produto, 2 personas e 10 funcionalidades numeradas e distintas",
@@ -103,43 +122,62 @@ def main():
         context=[descoberta_task],  # recebe visao, personas e funcionalidades
         guardrail=observar_guardrail(guardrail_backlog, sala),
     )
-    
+
+    # --- Scrum Master ---
+    tarefas_task = Task(
+        description=descricao_tarefas,
+        expected_output="2 tarefas tecnicas com esforco P/M/G para cada historia de US-01 a US-09",
+        agent=scrum_agent,
+        context=[backlog_task],  # recebe as 10 user stories do PO
+        guardrail=observar_guardrail(guardrail_tarefas, sala),
+    )
+
+    sprint_task = Task(
+        description=descricao_sprint,
+        expected_output="Plano de 2 sprints, definicao de pronto e impedimentos",
+        agent=scrum_agent,
+        context=[tarefas_task],  # recebe so as tarefas
+        guardrail=observar_guardrail(guardrail_sprint, sala),
+    )
+
     def ao_concluir_tarefa(output):
         # [SALA] Chamado pelo CrewAI depois de cada tarefa aprovada
-        if sala.get("etapa") == "descoberta":
+        etapa = sala.get("etapa")
+        if etapa in PROXIMA_ETAPA:
+            mensagem, proxima = PROXIMA_ETAPA[etapa]
             sala.publicar(
-                "Funcionalidades aprovadas. Começando as user stories.",
-                tipo="ok", estado="escrevendo", etapa="backlog", tentativa=0, motivo="",
+                mensagem,
+                tipo="ok", estado="escrevendo", etapa=proxima, tentativa=0, motivo="",
             )
 
-    # 5. MONTA O CREW SO COM O PO
+    # 5. MONTA O CREW COM O PO E O SCRUM MASTER
     crew = Crew(
-        agents=[po_agent],
-        tasks=[descoberta_task, backlog_task],
+        agents=[po_agent, scrum_agent],
+        tasks=[descoberta_task, backlog_task, tarefas_task, sprint_task],
         verbose=True,
         task_callback=ao_concluir_tarefa,  # [SALA]
     )
 
-    print("\nPO trabalhando... aguarde...\n")
+    print("\nSquad trabalhando... aguarde...\n")
     try:
         result = crew.kickoff()
     except Exception as erro:
         # Se o guardrail esgotar as tentativas, o CrewAI levanta excecao
-        print(f"\nO PO nao conseguiu gerar um backlog valido: {erro}")
+        print(f"\nA squad nao conseguiu gerar um resultado valido: {erro}")
         print("Tente detalhar mais a ideia ou rodar novamente.")
         return
 
-    # 6. SALVA O RESULTADO (as duas etapas, nao so a ultima)
+    # 6. SALVA O RESULTADO (as quatro etapas, nao so a ultima)
     documento = "\n\n".join(t.raw for t in result.tasks_output)
 
     os.makedirs("output", exist_ok=True)
-    with open("output/backlog_po.md", "w", encoding="utf-8") as f:
+    with open("output/squad.md", "w", encoding="utf-8") as f:
         f.write(documento)
 
-    sala.publicar("Backlog salvo em output/backlog_po.md", tipo="ok", estado="pronto", etapa="fim")
+    sala.publicar("Backlog e sprints salvos em output/squad.md", tipo="ok", estado="pronto", etapa="fim")
 
     print("\n" + "=" * 60)
-    print("PRONTO! Resultado salvo em: output/backlog_po.md")
+    print("PRONTO! Resultado salvo em: output/squad.md")
     print("=" * 60)
     print(documento)
     esperar_enter()

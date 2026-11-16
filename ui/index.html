@@ -1,229 +1,531 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sala da squad</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<style>
-  :root {
-    color-scheme: light;
-    --fundo: #bcd6e6;
-    --fundo-grade: rgba(255, 255, 255, .35);
-    --painel: #fbfaff;
-    --tinta: #2a2340;
-    --tinta-suave: #5d5480;
-    --borda: #2a2340;
-    --ok: #2f8a4c;
-    --alerta: #a85f0c;
-    --erro: #b8352e;
-    --ceu: #9fd8ff;
-    --astro: #ffe27a;
-  }
-  @media (prefers-color-scheme: dark) {
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sala da squad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
     :root {
-      color-scheme: dark;
-      --fundo: #17142e;
-      --fundo-grade: rgba(255, 255, 255, .04);
-      --painel: #2b2650;
-      --tinta: #f1edff;
-      --tinta-suave: #b8b0dc;
-      --borda: #0c0a1c;
-      --ok: #6fd28e;
-      --alerta: #f2b45a;
-      --erro: #ff8a80;
-      --ceu: #2c3772;
-      --astro: #f4f1ff;
+      color-scheme: light;
+      --fundo: #bcd6e6;
+      --fundo-grade: rgba(255, 255, 255, .35);
+      --painel: #fbfaff;
+      --tinta: #2a2340;
+      --tinta-suave: #5d5480;
+      --borda: #2a2340;
+      --ok: #2f8a4c;
+      --alerta: #a85f0c;
+      --erro: #b8352e;
+      --ceu: #9fd8ff;
+      --astro: #ffe27a;
     }
-  }
 
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  html, body { margin: 0; }
-  body {
-    min-height: 100vh;
-    background-color: var(--fundo);
-    background-image:
-      linear-gradient(var(--fundo-grade) 1px, transparent 1px),
-      linear-gradient(90deg, var(--fundo-grade) 1px, transparent 1px);
-    background-size: 16px 16px;
-    color: var(--tinta);
-    font-family: "VT323", ui-monospace, Consolas, monospace;
-    font-size: 21px;
-    line-height: 1.2;
-  }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --fundo: #17142e;
+        --fundo-grade: rgba(255, 255, 255, .04);
+        --painel: #2b2650;
+        --tinta: #f1edff;
+        --tinta-suave: #b8b0dc;
+        --borda: #0c0a1c;
+        --ok: #6fd28e;
+        --alerta: #f2b45a;
+        --erro: #ff8a80;
+        --ceu: #2c3772;
+        --astro: #f4f1ff;
+      }
+    }
 
-  .topo { max-width: 1180px; margin: 0 auto; padding: 22px 24px 0; }
-  h1 {
-    margin: 0 0 10px;
-    font-family: "Press Start 2P", ui-monospace, Consolas, monospace;
-    font-size: 15px;
-    font-weight: normal;
-  }
-  #ideia { margin: 0; max-width: 70ch; color: var(--tinta-suave); }
+    * {
+      box-sizing: border-box;
+    }
 
-  .layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 330px;
-    gap: 24px;
-    align-items: start;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 12px 24px 32px;
-  }
-  @media (max-width: 860px) {
-    .layout { grid-template-columns: 1fr; }
-  }
+    [hidden] {
+      display: none !important;
+    }
 
-  #cena { display: block; width: 100%; height: auto; }
-  #cena .px { shape-rendering: crispEdges; }
+    html,
+    body {
+      margin: 0;
+    }
 
-  .painel {
-    background: var(--painel);
-    border: 3px solid var(--borda);
-    box-shadow: 5px 5px 0 var(--borda);
-    padding: 14px 16px 16px;
-  }
-  .cartao-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
-  .nome { font-size: 26px; }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 8px;
-    border: 2px solid var(--borda);
-    white-space: nowrap;
-  }
-  .chip::before { content: ""; width: 8px; height: 8px; background: currentColor; }
-  .chip[data-tipo="ok"] { color: var(--ok); }
-  .chip[data-tipo="alerta"] { color: var(--alerta); }
-  .chip[data-tipo="erro"] { color: var(--erro); }
-  .linha { margin: 8px 0 0; color: var(--tinta-suave); }
-  #tentativas { color: var(--alerta); }
+    body {
+      min-height: 100vh;
+      background-color: var(--fundo);
+      background-image:
+        linear-gradient(var(--fundo-grade) 1px, transparent 1px),
+        linear-gradient(90deg, var(--fundo-grade) 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: var(--tinta);
+      font-family: "VT323", ui-monospace, Consolas, monospace;
+      font-size: 21px;
+      line-height: 1.2;
+    }
 
-  .legenda { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; }
-  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
-  .legenda i { width: 12px; height: 12px; border: 2px solid var(--borda); }
+    .topo {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 24px 0;
+    }
 
-  h2 {
-    margin: 16px 0 6px;
-    padding-top: 12px;
-    border-top: 2px dashed var(--tinta-suave);
-    font-size: 21px;
-    font-weight: normal;
-  }
-  #diario { list-style: none; margin: 0; padding: 0; max-height: 330px; overflow-y: auto; }
-  #diario li { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 3px 0; }
-  #diario time { color: var(--tinta-suave); }
-  #diario span { overflow-wrap: anywhere; }
-  #diario li[data-tipo="ok"] span { color: var(--ok); }
-  #diario li[data-tipo="alerta"] span { color: var(--alerta); }
-  #diario li[data-tipo="erro"] span { color: var(--erro); }
-  .vazio-diario { color: var(--tinta-suave); }
+    h1 {
+      margin: 0 0 10px;
+      font-family: "Press Start 2P", ui-monospace, Consolas, monospace;
+      font-size: 15px;
+      font-weight: normal;
+    }
 
-  #aviso {
-    position: fixed;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    width: max-content;
-    max-width: min(92vw, 560px);
-    padding: 8px 14px;
-    background: var(--painel);
-    border: 3px solid var(--borda);
-    box-shadow: 4px 4px 0 var(--borda);
-  }
+    #ideia {
+      margin: 0;
+      max-width: 70ch;
+      color: var(--tinta-suave);
+    }
 
-  /* ---------- Cena: sala ---------- */
-  .ceu { fill: var(--ceu); }
-  .astro { fill: var(--astro); }
-  .rotulo-mesa { font-family: "VT323", ui-monospace, monospace; font-size: 11px; fill: #fff4e2; }
-  .balao-texto { font-family: "VT323", ui-monospace, monospace; font-size: 15px; fill: #2a2340; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 24px;
+      align-items: start;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 24px 32px;
+    }
 
-  /* ---------- Quadro de notas ---------- */
-  .nota { opacity: 0; transition: opacity .3s; }
-  .quadro.listado .nota,
-  .quadro.priorizado .nota { opacity: 1; }
-  .quadro.rascunho .nota {
-    animation: rascunha 5s steps(1) infinite;
-    animation-delay: calc(var(--i) * .4s);
-  }
-  @keyframes rascunha {
-    0% { opacity: 0; }
-    8% { opacity: 1; }
-    85% { opacity: 1; }
-    92% { opacity: 0; }
-  }
-  .papel {
-    fill: #ffe27a;
-    transition: fill .4s steps(2);
-    transition-delay: calc(var(--i) * .14s);
-  }
-  .priorizado .nota[data-p="MUST"] .papel { fill: #7fd393; }
-  .priorizado .nota[data-p="SHOULD"] .papel { fill: #8cc3f5; }
-  .priorizado .nota[data-p="COULD"] .papel { fill: #f5ad66; }
-  .priorizado .nota[data-p="WONT"] .papel { fill: #c4bed6; }
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
 
-  /* ---------- PO: movimento e estados ---------- */
-  .po, .camada-balao { transition: transform 1.4s linear; }
-  .sem-transicao { transition: none !important; }
+    #cena {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
 
-  .corpo { animation: respira 1.8s steps(1) infinite; }
-  @keyframes respira { 50% { transform: translateY(1px); } }
+    #cena .px {
+      shape-rendering: crispEdges;
+    }
 
-  .palpebras { opacity: 0; animation: pisca 4.4s steps(1) infinite; }
-  @keyframes pisca { 0%, 95% { opacity: 0; } 96%, 100% { opacity: 1; } }
+    .painel {
+      background: var(--painel);
+      border: 3px solid var(--borda);
+      box-shadow: 5px 5px 0 var(--borda);
+      padding: 14px 16px 16px;
+    }
 
-  .brilho { opacity: 0; }
-  .estado-escrevendo .brilho { animation: tela 1.4s steps(1) infinite; }
-  @keyframes tela { 0% { opacity: .12; } 33% { opacity: .26; } 66% { opacity: .18; } }
+    .cartao-topo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px 10px;
+    }
 
-  .estado-escrevendo .braco-esq { animation: digita .34s steps(1) infinite; }
-  .estado-escrevendo .braco-dir { animation: digita .34s steps(1) infinite .17s; }
-  @keyframes digita { 50% { transform: translateY(-2px); } }
+    .nome {
+      font-size: 26px;
+    }
 
-  .estado-pensando .braco-dir { transform: translate(-2px, -8px); }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      border: 2px solid var(--borda);
+      white-space: nowrap;
+    }
 
-  .estado-revisando .corpo.treme { animation: treme .12s steps(1) 6; }
-  @keyframes treme { 50% { transform: translateX(2px); } }
+    .chip::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: currentColor;
+    }
 
-  .estado-pronto .corpo { animation: pula .6s steps(1) 4; }
-  @keyframes pula {
-    25% { transform: translateY(-6px); }
-    50% { transform: translateY(-10px); }
-    75% { transform: translateY(-6px); }
-  }
-  .estado-pronto .braco-esq,
-  .estado-pronto .braco-dir { transform: translateY(-10px); }
+    .chip[data-tipo="ok"] {
+      color: var(--ok);
+    }
 
-  .estado-erro .cabeca { transform: translateY(2px); }
+    .chip[data-tipo="alerta"] {
+      color: var(--alerta);
+    }
 
-  .po.andando .corpo { animation: anda .36s steps(1) infinite; }
-  @keyframes anda { 50% { transform: translateY(-2px); } }
-  .po.andando .perna-esq { animation: passo .36s steps(1) infinite; }
-  .po.andando .perna-dir { animation: passo .36s steps(1) infinite .18s; }
-  @keyframes passo { 50% { transform: translateY(-2px); } }
-  .po.andando .braco-esq,
-  .po.andando .braco-dir { animation: none; transform: none; }
+    .chip[data-tipo="erro"] {
+      color: var(--erro);
+    }
 
-  .led { fill: #3d3858; }
-  .estado-escrevendo .led { animation: led .9s steps(1) infinite; }
-  @keyframes led { 50% { fill: #7dffb2; } }
+    .linha {
+      margin: 8px 0 0;
+      color: var(--tinta-suave);
+    }
 
-  .ponto { animation: ponto 1.2s steps(1) infinite; }
-  .ponto.p2 { animation-delay: .3s; }
-  .ponto.p3 { animation-delay: .6s; }
-  @keyframes ponto { 0% { opacity: 0; } 25% { opacity: 1; } }
+    #tentativas {
+      color: var(--alerta);
+    }
 
-  @media (prefers-reduced-motion: reduce) {
-    .po, .camada-balao { transition: none; }
-    #cena, #cena * { animation: none !important; }
-    .quadro.rascunho .nota { opacity: .7; }
-  }
-</style>
+    .legenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 14px;
+      margin: 10px 0 0;
+    }
+
+    .legenda span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legenda i {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--borda);
+    }
+
+    h2 {
+      margin: 16px 0 6px;
+      padding-top: 12px;
+      border-top: 2px dashed var(--tinta-suave);
+      font-size: 21px;
+      font-weight: normal;
+    }
+
+    #diario {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 330px;
+      overflow-y: auto;
+    }
+
+    #diario li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 3px 0;
+    }
+
+    #diario time {
+      color: var(--tinta-suave);
+    }
+
+    #diario span {
+      overflow-wrap: anywhere;
+    }
+
+    #diario li[data-tipo="ok"] span {
+      color: var(--ok);
+    }
+
+    #diario li[data-tipo="alerta"] span {
+      color: var(--alerta);
+    }
+
+    #diario li[data-tipo="erro"] span {
+      color: var(--erro);
+    }
+
+    .vazio-diario {
+      color: var(--tinta-suave);
+    }
+
+    #aviso {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: min(92vw, 560px);
+      padding: 8px 14px;
+      background: var(--painel);
+      border: 3px solid var(--borda);
+      box-shadow: 4px 4px 0 var(--borda);
+    }
+
+    /* ---------- Cena: sala ---------- */
+    .ceu {
+      fill: var(--ceu);
+    }
+
+    .astro {
+      fill: var(--astro);
+    }
+
+    .rotulo-mesa {
+      font-family: "VT323", ui-monospace, monospace;
+      font-size: 11px;
+      fill: #fff4e2;
+    }
+
+    .balao-texto {
+      font-family: "VT323", ui-monospace, monospace;
+      font-size: 15px;
+      fill: #2a2340;
+    }
+
+    /* ---------- Quadro de notas ---------- */
+    .nota {
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .quadro.listado .nota,
+    .quadro.priorizado .nota {
+      opacity: 1;
+    }
+
+    .quadro.rascunho .nota {
+      animation: rascunha 5s steps(1) infinite;
+      animation-delay: calc(var(--i) * .4s);
+    }
+
+    @keyframes rascunha {
+      0% {
+        opacity: 0;
+      }
+
+      8% {
+        opacity: 1;
+      }
+
+      85% {
+        opacity: 1;
+      }
+
+      92% {
+        opacity: 0;
+      }
+    }
+
+    .papel {
+      fill: #ffe27a;
+      transition: fill .4s steps(2);
+      transition-delay: calc(var(--i) * .14s);
+    }
+
+    .priorizado .nota[data-p="MUST"] .papel {
+      fill: #7fd393;
+    }
+
+    .priorizado .nota[data-p="SHOULD"] .papel {
+      fill: #8cc3f5;
+    }
+
+    .priorizado .nota[data-p="COULD"] .papel {
+      fill: #f5ad66;
+    }
+
+    .priorizado .nota[data-p="WONT"] .papel {
+      fill: #c4bed6;
+    }
+
+    /* ---------- Personagens: movimento e estados ----------
+     Todos respiram e piscam; so o personagem com a classe .ativo
+     reage ao estado atual (escrevendo, pensando, refazendo, pronto). */
+    .personagem,
+    .camada-balao {
+      transition: transform 1.4s linear;
+    }
+
+    .sem-transicao {
+      transition: none !important;
+    }
+
+    .corpo {
+      animation: respira 1.8s steps(1) infinite;
+    }
+
+    @keyframes respira {
+      50% {
+        transform: translateY(1px);
+      }
+    }
+
+    .palpebras {
+      opacity: 0;
+      animation: pisca 4.4s steps(1) infinite;
+    }
+
+    @keyframes pisca {
+
+      0%,
+      95% {
+        opacity: 0;
+      }
+
+      96%,
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .brilho {
+      opacity: 0;
+    }
+
+    .estado-escrevendo .ativo .brilho {
+      animation: tela 1.4s steps(1) infinite;
+    }
+
+    @keyframes tela {
+      0% {
+        opacity: .12;
+      }
+
+      33% {
+        opacity: .26;
+      }
+
+      66% {
+        opacity: .18;
+      }
+    }
+
+    .estado-escrevendo .ativo .braco-esq {
+      animation: digita .34s steps(1) infinite;
+    }
+
+    .estado-escrevendo .ativo .braco-dir {
+      animation: digita .34s steps(1) infinite .17s;
+    }
+
+    @keyframes digita {
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+
+    .estado-pensando .ativo .braco-dir {
+      transform: translate(-2px, -8px);
+    }
+
+    .estado-revisando .ativo .corpo.treme {
+      animation: treme .12s steps(1) 6;
+    }
+
+    @keyframes treme {
+      50% {
+        transform: translateX(2px);
+      }
+    }
+
+    .estado-pronto .ativo .corpo {
+      animation: pula .6s steps(1) 4;
+    }
+
+    @keyframes pula {
+      25% {
+        transform: translateY(-6px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      75% {
+        transform: translateY(-6px);
+      }
+    }
+
+    .estado-pronto .ativo .braco-esq,
+    .estado-pronto .ativo .braco-dir {
+      transform: translateY(-10px);
+    }
+
+    .estado-erro .ativo .cabeca {
+      transform: translateY(2px);
+    }
+
+    .personagem.andando .corpo {
+      animation: anda .36s steps(1) infinite;
+    }
+
+    @keyframes anda {
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+
+    .personagem.andando .perna-esq {
+      animation: passo .36s steps(1) infinite;
+    }
+
+    .personagem.andando .perna-dir {
+      animation: passo .36s steps(1) infinite .18s;
+    }
+
+    @keyframes passo {
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+
+    .personagem.andando .braco-esq,
+    .personagem.andando .braco-dir {
+      animation: none;
+      transform: none;
+    }
+
+    .led {
+      fill: #3d3858;
+    }
+
+    .estado-escrevendo .led.ativo {
+      animation: led .9s steps(1) infinite;
+    }
+
+    @keyframes led {
+      50% {
+        fill: #7dffb2;
+      }
+    }
+
+    .ponto {
+      animation: ponto 1.2s steps(1) infinite;
+    }
+
+    .ponto.p2 {
+      animation-delay: .3s;
+    }
+
+    .ponto.p3 {
+      animation-delay: .6s;
+    }
+
+    @keyframes ponto {
+      0% {
+        opacity: 0;
+      }
+
+      25% {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .personagem,
+      .camada-balao {
+        transition: none;
+      }
+
+      #cena,
+      #cena * {
+        animation: none !important;
+      }
+
+      .quadro.rascunho .nota {
+        opacity: .7;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <header class="topo">
     <h1>Sala da squad</h1>
@@ -233,13 +535,14 @@
   <main class="layout">
     <section class="palco">
       <svg id="cena" viewBox="135 15 380 315" role="img" aria-labelledby="cena-titulo">
-        <title id="cena-titulo">Sala isométrica com o Product Owner, um quadro de notas e mesas vazias para os próximos agentes</title>
+        <title id="cena-titulo">Sala isométrica com o Product Owner, o Scrum Master, um quadro de notas e mesas vazias
+          para os próximos agentes</title>
       </svg>
     </section>
 
     <aside class="painel">
       <div class="cartao-topo">
-        <span class="nome">Product Owner</span>
+        <span id="nome" class="nome">Product Owner</span>
         <span id="chip" class="chip" aria-live="polite">Conectando</span>
       </div>
       <p id="etapa" class="linha">Esperando o main.py</p>
@@ -251,7 +554,9 @@
         <span><i style="background:#c4bed6"></i>Won’t</span>
       </p>
       <h2>Diário da sala</h2>
-      <ol id="diario"><li class="vazio-diario">Nada por aqui ainda.</li></ol>
+      <ol id="diario">
+        <li class="vazio-diario">Nada por aqui ainda.</li>
+      </ol>
     </aside>
   </main>
 
@@ -259,396 +564,462 @@
     Sem resposta do main.py. Rode <code>python main.py</code> e esta página volta a se atualizar sozinha.
   </div>
 
-<script>
-(() => {
-  // ================================================================ GEOMETRIA
-  const NS = "http://www.w3.org/2000/svg";
-  const TW = 32, TH = 16;          // losango do piso: proporção 2:1, padrão de pixel art isométrico
-  const N = 10;                    // sala de 10 x 10 pisos
-  const ALT = 118;                 // altura das paredes
-  const OX = 320, OY = 150;        // canto do fundo da sala, na tela
+  <script>
+    (() => {
+      // ================================================================ GEOMETRIA
+      const NS = "http://www.w3.org/2000/svg";
+      const TW = 32, TH = 16;          // losango do piso: proporção 2:1, padrão de pixel art isométrico
+      const N = 10;                    // sala de 10 x 10 pisos
+      const ALT = 118;                 // altura das paredes
+      const OX = 320, OY = 150;        // canto do fundo da sala, na tela
 
-  // Converte coordenadas do mundo (i, j no piso; z para cima) em coordenadas da tela.
-  const iso = (i, j, z = 0) => [OX + (i - j) * TW / 2, OY + (i + j) * TH / 2 - z];
-  const pontos = (...ps) => ps.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+      // Converte coordenadas do mundo (i, j no piso; z para cima) em coordenadas da tela.
+      const iso = (i, j, z = 0) => [OX + (i - j) * TW / 2, OY + (i + j) * TH / 2 - z];
+      const pontos = (...ps) => ps.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
 
-  function el(tag, attrs = {}, pai) {
-    const e = document.createElementNS(NS, tag);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
-    if (pai) pai.appendChild(e);
-    return e;
-  }
-  const poligono = (pai, cor, ...ps) => el("polygon", { points: pontos(...ps), fill: cor }, pai);
-  const naParedeEsq = (pai, cor, j1, j2, z1, z2) =>
-    poligono(pai, cor, iso(0, j1, z1), iso(0, j2, z1), iso(0, j2, z2), iso(0, j1, z2));
-  const naParedeDir = (pai, cor, i1, i2, z1, z2) =>
-    poligono(pai, cor, iso(i1, 0, z1), iso(i2, 0, z1), iso(i2, 0, z2), iso(i1, 0, z2));
+      function el(tag, attrs = {}, pai) {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        if (pai) pai.appendChild(e);
+        return e;
+      }
+      const poligono = (pai, cor, ...ps) => el("polygon", { points: pontos(...ps), fill: cor }, pai);
+      const naParedeEsq = (pai, cor, j1, j2, z1, z2) =>
+        poligono(pai, cor, iso(0, j1, z1), iso(0, j2, z1), iso(0, j2, z2), iso(0, j1, z2));
+      const naParedeDir = (pai, cor, i1, i2, z1, z2) =>
+        poligono(pai, cor, iso(i1, 0, z1), iso(i2, 0, z1), iso(i2, 0, z2), iso(i1, 0, z2));
 
-  // Caixa isométrica: desenha só as 3 faces visíveis (topo, frente-esquerda, frente-direita).
-  function caixa(pai, i, j, w, d, h, z, [topo, esq, dir]) {
-    const g = el("g", {}, pai);
-    poligono(g, esq, iso(i, j + d, z), iso(i + w, j + d, z), iso(i + w, j + d, z + h), iso(i, j + d, z + h));
-    poligono(g, dir, iso(i + w, j, z), iso(i + w, j + d, z), iso(i + w, j + d, z + h), iso(i + w, j, z + h));
-    poligono(g, topo, iso(i, j, z + h), iso(i + w, j, z + h), iso(i + w, j + d, z + h), iso(i, j + d, z + h));
-    return g;
-  }
+      // Caixa isométrica: desenha só as 3 faces visíveis (topo, frente-esquerda, frente-direita).
+      function caixa(pai, i, j, w, d, h, z, [topo, esq, dir]) {
+        const g = el("g", {}, pai);
+        poligono(g, esq, iso(i, j + d, z), iso(i + w, j + d, z), iso(i + w, j + d, z + h), iso(i, j + d, z + h));
+        poligono(g, dir, iso(i + w, j, z), iso(i + w, j + d, z), iso(i + w, j + d, z + h), iso(i + w, j, z + h));
+        poligono(g, topo, iso(i, j, z + h), iso(i + w, j, z + h), iso(i + w, j + d, z + h), iso(i, j + d, z + h));
+        return g;
+      }
 
-  const C = {
-    paredeEsq: "#a99bc7", paredeDir: "#c3b6dd", rodapeEsq: "#6f5f95", rodapeDir: "#7d6ca6",
-    capa: "#e6dff3", ponta: "#8a7bb0", junta: "rgba(42,35,64,.10)",
-    piso1: "#8fb3b0", piso2: "#84a8a5", bordaEsq: "#5d7a78", bordaDir: "#6e8e8b",
-    tapete: "#d9a441", tapeteBorda: "#b9862a",
-    moldura: "#f3eef8", peitoril: ["#f3eef8", "#cfc6dd", "#e0d8ea"],
-    batente: "#5a3d2b", porta: "#7a5440", macaneta: "#ffd24a",
-    molduraQuadro: "#6b4a35", cortica: "#c9965f", alfinete: "#d94b4b",
-    tampo: ["#d79a5c", "#b8773d", "#a0652f"], movel: ["#c68a4f", "#a86d36", "#8c5728"],
-    laptop: ["#d6d3e2", "#a29eb5", "#b7b3c8"], tampa: "#8c879f",
-    caneca: ["#fbfaff", "#d6d1e6", "#e6e1f2"],
-    vaso: ["#d07a4f", "#a85a37", "#bd6a42"], folha1: "#4e9a5a", folha2: "#3d7d48",
-  };
+      const C = {
+        paredeEsq: "#a99bc7", paredeDir: "#c3b6dd", rodapeEsq: "#6f5f95", rodapeDir: "#7d6ca6",
+        capa: "#e6dff3", ponta: "#8a7bb0", junta: "rgba(42,35,64,.10)",
+        piso1: "#8fb3b0", piso2: "#84a8a5", bordaEsq: "#5d7a78", bordaDir: "#6e8e8b",
+        tapete: "#d9a441", tapeteBorda: "#b9862a",
+        moldura: "#f3eef8", peitoril: ["#f3eef8", "#cfc6dd", "#e0d8ea"],
+        batente: "#5a3d2b", porta: "#7a5440", macaneta: "#ffd24a",
+        molduraQuadro: "#6b4a35", cortica: "#c9965f", alfinete: "#d94b4b",
+        tampo: ["#d79a5c", "#b8773d", "#a0652f"], movel: ["#c68a4f", "#a86d36", "#8c5728"],
+        laptop: ["#d6d3e2", "#a29eb5", "#b7b3c8"], tampa: "#8c879f",
+        caneca: ["#fbfaff", "#d6d1e6", "#e6e1f2"],
+        vaso: ["#d07a4f", "#a85a37", "#bd6a42"], folha1: "#4e9a5a", folha2: "#3d7d48",
+      };
 
-  const cena = document.getElementById("cena");
+      const cena = document.getElementById("cena");
 
-  // ================================================================ FUNDO: PAREDES E PISO
-  const fundo = el("g", { class: "px" }, cena);
+      // ================================================================ FUNDO: PAREDES E PISO
+      const fundo = el("g", { class: "px" }, cena);
 
-  naParedeEsq(fundo, C.paredeEsq, 0, N, 0, ALT);
-  naParedeDir(fundo, C.paredeDir, 0, N, 0, ALT);
-  for (let k = 1; k < N; k++) {
-    el("line", { x1: iso(0, k, 7)[0], y1: iso(0, k, 7)[1], x2: iso(0, k, ALT)[0], y2: iso(0, k, ALT)[1], stroke: C.junta }, fundo);
-    el("line", { x1: iso(k, 0, 7)[0], y1: iso(k, 0, 7)[1], x2: iso(k, 0, ALT)[0], y2: iso(k, 0, ALT)[1], stroke: C.junta }, fundo);
-  }
-  naParedeEsq(fundo, C.rodapeEsq, 0, N, 0, 7);
-  naParedeDir(fundo, C.rodapeDir, 0, N, 0, 7);
+      naParedeEsq(fundo, C.paredeEsq, 0, N, 0, ALT);
+      naParedeDir(fundo, C.paredeDir, 0, N, 0, ALT);
+      for (let k = 1; k < N; k++) {
+        el("line", { x1: iso(0, k, 7)[0], y1: iso(0, k, 7)[1], x2: iso(0, k, ALT)[0], y2: iso(0, k, ALT)[1], stroke: C.junta }, fundo);
+        el("line", { x1: iso(k, 0, 7)[0], y1: iso(k, 0, 7)[1], x2: iso(k, 0, ALT)[0], y2: iso(k, 0, ALT)[1], stroke: C.junta }, fundo);
+      }
+      naParedeEsq(fundo, C.rodapeEsq, 0, N, 0, 7);
+      naParedeDir(fundo, C.rodapeDir, 0, N, 0, 7);
 
-  // Espessura das paredes: topo e pontas
-  const E = 0.3;
-  poligono(fundo, C.capa, iso(0, 0, ALT), iso(0, N, ALT), iso(-E, N, ALT), iso(-E, -E, ALT));
-  poligono(fundo, C.capa, iso(0, 0, ALT), iso(N, 0, ALT), iso(N, -E, ALT), iso(-E, -E, ALT));
-  poligono(fundo, C.ponta, iso(-E, N, 0), iso(0, N, 0), iso(0, N, ALT), iso(-E, N, ALT));
-  poligono(fundo, C.ponta, iso(N, -E, 0), iso(N, 0, 0), iso(N, 0, ALT), iso(N, -E, ALT));
+      // Espessura das paredes: topo e pontas
+      const E = 0.3;
+      poligono(fundo, C.capa, iso(0, 0, ALT), iso(0, N, ALT), iso(-E, N, ALT), iso(-E, -E, ALT));
+      poligono(fundo, C.capa, iso(0, 0, ALT), iso(N, 0, ALT), iso(N, -E, ALT), iso(-E, -E, ALT));
+      poligono(fundo, C.ponta, iso(-E, N, 0), iso(0, N, 0), iso(0, N, ALT), iso(-E, N, ALT));
+      poligono(fundo, C.ponta, iso(N, -E, 0), iso(N, 0, 0), iso(N, 0, ALT), iso(N, -E, ALT));
 
-  // Janela (parede direita): o céu acompanha o tema claro/escuro
-  naParedeDir(fundo, C.moldura, 5.4, 8.0, 46, 100);
-  naParedeDir(fundo, null, 5.55, 7.85, 51, 95).setAttribute("class", "ceu");
-  naParedeDir(fundo, null, 7.1, 7.45, 79, 88).setAttribute("class", "astro");
-  naParedeDir(fundo, C.moldura, 6.65, 6.75, 51, 95);
-  naParedeDir(fundo, C.moldura, 5.55, 7.85, 72, 74);
-  caixa(fundo, 5.3, 0, 2.8, 0.25, 3, 43, C.peitoril);
+      // Janela (parede direita): o céu acompanha o tema claro/escuro
+      naParedeDir(fundo, C.moldura, 5.4, 8.0, 46, 100);
+      naParedeDir(fundo, null, 5.55, 7.85, 51, 95).setAttribute("class", "ceu");
+      naParedeDir(fundo, null, 7.1, 7.45, 79, 88).setAttribute("class", "astro");
+      naParedeDir(fundo, C.moldura, 6.65, 6.75, 51, 95);
+      naParedeDir(fundo, C.moldura, 5.55, 7.85, 72, 74);
+      caixa(fundo, 5.3, 0, 2.8, 0.25, 3, 43, C.peitoril);
 
-  // Porta (parede esquerda)
-  naParedeEsq(fundo, C.batente, 6.9, 8.4, 0, 78);
-  naParedeEsq(fundo, C.porta, 7.0, 8.3, 0, 74);
-  naParedeEsq(fundo, C.macaneta, 7.15, 7.27, 34, 38);
+      // Porta (parede esquerda)
+      naParedeEsq(fundo, C.batente, 6.9, 8.4, 0, 78);
+      naParedeEsq(fundo, C.porta, 7.0, 8.3, 0, 74);
+      naParedeEsq(fundo, C.macaneta, 7.15, 7.27, 34, 38);
 
-  // Piso xadrez com borda de espessura
-  for (let i = 0; i < N; i++) {
-    for (let j = 0; j < N; j++) {
-      poligono(fundo, (i + j) % 2 ? C.piso1 : C.piso2, iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1));
-    }
-  }
-  poligono(fundo, C.bordaEsq, iso(-E, N), iso(N, N), iso(N, N, -8), iso(-E, N, -8));
-  poligono(fundo, C.bordaDir, iso(N, -E), iso(N, N), iso(N, N, -8), iso(N, -E, -8));
+      // Piso xadrez com borda de espessura
+      for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+          poligono(fundo, (i + j) % 2 ? C.piso1 : C.piso2, iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1));
+        }
+      }
+      poligono(fundo, C.bordaEsq, iso(-E, N), iso(N, N), iso(N, N, -8), iso(-E, N, -8));
+      poligono(fundo, C.bordaDir, iso(N, -E), iso(N, N), iso(N, N, -8), iso(N, -E, -8));
 
-  // Tapete sob as mesas
-  poligono(fundo, C.tapeteBorda, iso(2.1, 5.2), iso(8.9, 5.2), iso(8.9, 9.9), iso(2.1, 9.9));
-  poligono(fundo, C.tapete, iso(2.3, 5.4), iso(8.7, 5.4), iso(8.7, 9.7), iso(2.3, 9.7));
+      // Tapete sob as mesas
+      poligono(fundo, C.tapeteBorda, iso(2.1, 5.2), iso(8.9, 5.2), iso(8.9, 9.9), iso(2.1, 9.9));
+      poligono(fundo, C.tapete, iso(2.3, 5.4), iso(8.7, 5.4), iso(8.7, 9.7), iso(2.3, 9.7));
 
-  // Quadro de notas (parede esquerda): 10 notas = 10 funcionalidades
-  const quadro = el("g", { class: "quadro vazio" }, fundo);
-  naParedeEsq(quadro, C.molduraQuadro, 1.2, 5.0, 42, 100);
-  naParedeEsq(quadro, C.cortica, 1.32, 4.88, 46, 96);
-  const PRIORIDADES = ["MUST", "MUST", "MUST", "MUST", "SHOULD", "SHOULD", "SHOULD", "COULD", "COULD", "WONT"];
-  PRIORIDADES.forEach((p, k) => {
-    const coluna = k % 5, linha = Math.floor(k / 5);
-    const j0 = 4.21 - coluna * 0.66;           // esquerda para a direita na tela
-    const topo = 91 - linha * 22;
-    const nota = el("g", { class: "nota", "data-p": p }, quadro);
-    nota.style.setProperty("--i", k);
-    naParedeEsq(nota, null, j0, j0 + 0.5, topo - 16, topo).setAttribute("class", "papel");
-    naParedeEsq(nota, "rgba(42,35,64,.35)", j0 + 0.08, j0 + 0.42, topo - 8, topo - 7);
-    naParedeEsq(nota, "rgba(42,35,64,.35)", j0 + 0.08, j0 + 0.3, topo - 12, topo - 11);
-    naParedeEsq(nota, C.alfinete, j0 + 0.2, j0 + 0.3, topo - 3, topo - 1);
-  });
-
-  // Planta no canto
-  caixa(fundo, 8.5, 0.5, 0.7, 0.7, 12, 0, C.vaso);
-  const [px, py] = iso(8.85, 0.85, 12);
-  [[-10, -14, 6, 12, 1], [4, -16, 6, 14, 2], [-4, -26, 6, 18, 1], [-14, -24, 6, 8, 2],
-   [9, -28, 6, 10, 1], [-1, -34, 4, 8, 2], [-8, -6, 16, 6, 2]]
-    .forEach(([dx, dy, w, h, c]) => el("rect", { x: px + dx, y: py + dy, width: w, height: h, fill: c === 1 ? C.folha1 : C.folha2 }, fundo));
-
-  // ================================================================ PO (sprite em pixel art)
-  // Cada letra é um pixel do sprite de 12 x 24. Cada pixel vira um quadrado 2 x 2 na cena.
-  const PALETA = {
-    H: "#4a2f22", S: "#f2c4a0", s: "#d9a07a", G: "#2a2340", E: "#2a2340", M: "#b0574a",
-    T: "#2f8f83", t: "#256f66", W: "#f4f1ff", B: "#ffd24a", P: "#3b4a6b", K: "#1f1b2e",
-  };
-  const SPRITE = [
-    "...HHHHHH...", "..HHHHHHHH..", ".HHHHHHHHHH.", ".HHSSSSSSHH.",
-    ".HSSSSSSSSH.", ".SGGGSSGGGS.", ".SGEGGGGEGS.", ".SGGGSSGGGS.",
-    ".SSSSSSSSSS.", "..SSSMMSSS..", "...SSSSSS...", "....ssss....",
-    ".TtTTTTTTtT.", "TtTTWTTWTTtT", "TtTTWTTBBTtT", "TtTTTTTBBTtT",
-    "TtTTTTTTTTtT", "SSTTTTTTTTSS", "..tttttttt..", "..PPPPPPPP..",
-    "..PPPPPPPP..", "..PPP..PPP..", "..PPP..PPP..", "..KKK..KKK..",
-  ];
-  // Em qual parte do corpo cada pixel fica (para animar braços e pernas separadamente)
-  const parteDe = (l, c) => {
-    if (l <= 11) return "cabeca";
-    if (l >= 21) return c < 6 ? "perna-esq" : "perna-dir";
-    if (l <= 17 && c <= 1) return "braco-esq";
-    if (l <= 17 && c >= 10) return "braco-dir";
-    return "tronco";
-  };
-  const opaco = (l, c) => l >= 0 && l < SPRITE.length && c >= 0 && c < 12 && SPRITE[l][c] !== ".";
-
-  const camadaPO = el("g", { class: "po" }, cena);
-  el("ellipse", { cx: 12, cy: 47, rx: 10, ry: 4, fill: "#000", opacity: .18 }, camadaPO);
-  const corpo = el("g", { class: "corpo px" }, camadaPO);
-  const partes = {};
-  ["perna-esq", "perna-dir", "tronco", "braco-esq", "braco-dir", "cabeca"].forEach(nome => {
-    partes[nome] = { contorno: new Set(), pixels: [], g: null };
-  });
-  SPRITE.forEach((linha, l) => [...linha].forEach((ch, c) => {
-    if (ch === ".") return;
-    const parte = partes[parteDe(l, c)];
-    parte.pixels.push([l, c, PALETA[ch]]);
-    // Contorno escuro estilo pixel art: vizinhos vazios do sprite inteiro
-    [[l - 1, c], [l + 1, c], [l, c - 1], [l, c + 1]].forEach(([nl, nc]) => {
-      if (!opaco(nl, nc)) parte.contorno.add(`${nl},${nc}`);
-    });
-  }));
-  Object.entries(partes).forEach(([nome, parte]) => {
-    parte.g = el("g", { class: nome }, corpo);
-    parte.contorno.forEach(chave => {
-      const [l, c] = chave.split(",").map(Number);
-      el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: "#1f1b2e" }, parte.g);
-    });
-    parte.pixels.forEach(([l, c, cor]) => el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: cor }, parte.g));
-  });
-  // Pálpebras (piscar) e brilho da tela no rosto
-  const palpebras = el("g", { class: "palpebras" }, partes.cabeca.g);
-  [[6, 3], [6, 8]].forEach(([l, c]) => el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: PALETA.S }, palpebras));
-  el("rect", { class: "brilho", x: 4, y: 6, width: 16, height: 14, fill: "#9ff6ff" }, partes.cabeca.g);
-
-  // ================================================================ MESAS (desenhadas depois do PO: ficam na frente dele)
-  const moveis = el("g", { class: "px" }, cena);
-  function mesa(i, j, rotulo, laptopAberto) {
-    const g = el("g", {}, moveis);
-    caixa(g, i + 0.05, j + 0.05, 1.9, 0.9, 15, 0, C.movel);
-    caixa(g, i, j, 2, 1, 3, 15, C.tampo);
-    const [tx, ty] = iso(i + 1, j + 0.95, 6);
-    const texto = el("text", { class: "rotulo-mesa", "text-anchor": "middle", transform: `translate(${tx} ${ty}) skewY(26.565)` }, g);
-    texto.textContent = rotulo;
-    if (laptopAberto) {
-      caixa(g, i + 1.05, j + 0.1, 0.9, 0.4, 1.5, 18, C.laptop);
-      poligono(g, C.tampa, iso(i + 1.05, j + 0.5, 19.5), iso(i + 1.95, j + 0.5, 19.5), iso(i + 1.95, j + 0.5, 30.5), iso(i + 1.05, j + 0.5, 30.5));
-      const [lx, ly] = iso(i + 1.5, j + 0.5, 25);
-      el("rect", { class: "led", x: lx - 1, y: ly - 1, width: 2, height: 2 }, g);
-      caixa(g, i + 0.3, j + 0.4, 0.28, 0.28, 5, 18, C.caneca);
-    } else {
-      caixa(g, i + 0.55, j + 0.3, 0.9, 0.5, 2.5, 18, C.laptop);
-    }
-  }
-  mesa(3, 6, "PO", true);
-  mesa(6, 6, "Dev", false);
-  mesa(3, 8.6, "QA", false);
-  mesa(6, 8.6, "Arq", false);
-
-  // ================================================================ BALÃO DE FALA (camada do topo)
-  const camadaBalao = el("g", { class: "camada-balao" }, cena);
-  const CORES_BALAO = { info: "#fbfaff", pensa: "#fbfaff", alerta: "#ffe7b0", ok: "#d3f5dc", erro: "#ffd0cb" };
-  let balaoAtual = "";
-
-  const LIMITE_DIREITO = 511;  // borda direita do viewBox, com folga
-
-  function desenharBalao(fala, larguraMax) {
-    const chave = JSON.stringify([fala, larguraMax]);
-    if (chave === balaoAtual) return;
-    balaoAtual = chave;
-    camadaBalao.replaceChildren();
-    if (!fala) return;
-
-    const g = el("g", { class: "px" }, camadaBalao);
-    const fundoG = el("g", {}, g);
-    const bx = 18, by = -26, h = 20;
-    const texto = el("text", { class: "balao-texto", "text-anchor": "middle", y: by + 14.5 }, g);
-    const conteudo = document.createTextNode(fala.texto);
-    texto.appendChild(conteudo);
-    if (fala.pontos) {
-      ["p1", "p2", "p3"].forEach(p => { el("tspan", { class: `ponto ${p}` }, texto).textContent = "."; });
-    }
-    const medir = () => {
-      let l = 0;
-      try { l = texto.getComputedTextLength(); } catch { /* sem layout ainda */ }
-      return l || (conteudo.data.length + (fala.pontos ? 3 : 0)) * 7;
-    };
-    let largura = medir();
-    // Encurta o texto até o balão caber na sala
-    let corte = fala.texto.length;
-    while (largura + 18 > larguraMax && corte > 8) {
-      corte--;
-      conteudo.data = fala.texto.slice(0, corte).trimEnd() + "…";
-      largura = medir();
-    }
-    const w = Math.round(largura + 18);
-    texto.setAttribute("x", bx + w / 2);
-
-    const escuro = "#2a2340", claro = CORES_BALAO[fala.tipo] || CORES_BALAO.info;
-    el("rect", { x: bx, y: by + 2, width: w, height: h - 4, fill: escuro }, fundoG);
-    el("rect", { x: bx + 2, y: by, width: w - 4, height: h, fill: escuro }, fundoG);
-    el("rect", { x: bx + 2, y: by + 2, width: w - 4, height: h - 4, fill: claro }, fundoG);
-    if (fala.tipo === "pensa") {
-      el("rect", { x: bx + 4, y: by + h + 2, width: 6, height: 6, fill: escuro }, fundoG);
-      el("rect", { x: bx + 6, y: by + h + 4, width: 2, height: 2, fill: claro }, fundoG);
-      el("rect", { x: bx, y: by + h + 10, width: 4, height: 4, fill: escuro }, fundoG);
-    } else {
-      poligono(fundoG, escuro, [bx + 4, by + h - 2], [bx + 12, by + h - 2], [bx + 2, by + h + 8]);
-      poligono(fundoG, claro, [bx + 6, by + h - 3], [bx + 10, by + h - 3], [bx + 4.5, by + h + 3.5]);
-    }
-  }
-
-  // ================================================================ MOVIMENTO
-  const LOCAIS = { quadro: iso(0.9, 3.0), mesa: iso(3.6, 5.4) };
-  let localAtual = null;
-
-  function moverPara(local, comTransicao) {
-    if (local === localAtual) return;
-    const [x, y] = LOCAIS[local];
-    const t = `translate(${x - 12}px, ${y - 47}px)`;
-    const camadas = [camadaPO, camadaBalao];
-    if (!comTransicao || localAtual === null) {
-      camadas.forEach(c => c.classList.add("sem-transicao"));
-      camadas.forEach(c => { c.style.transform = t; });
-      camadaPO.getBoundingClientRect();
-      camadas.forEach(c => c.classList.remove("sem-transicao"));
-    } else {
-      camadaPO.classList.add("andando");
-      camadas.forEach(c => { c.style.transform = t; });
-      clearTimeout(moverPara.timer);
-      moverPara.timer = setTimeout(() => camadaPO.classList.remove("andando"), 1450);
-    }
-    localAtual = local;
-  }
-  moverPara("mesa", false);
-
-  corpo.addEventListener("animationend", () => corpo.classList.remove("treme"));
-
-  // ================================================================ ESTADO VINDO DO main.py
-  const ROTULOS = {
-    aguardando: ["Aguardando ideia", "info"],
-    pensando: ["Pensando", "info"],
-    escrevendo: ["Escrevendo", "info"],
-    revisando: ["Refazendo", "alerta"],
-    pronto: ["Backlog pronto", "ok"],
-    erro: ["Parou com erro", "erro"],
-  };
-  const ETAPAS = {
-    descoberta: "Etapa 1 de 2: descobrindo as funcionalidades",
-    backlog: "Etapa 2 de 2: escrevendo as user stories",
-    fim: "Concluído: backlog salvo em output/backlog_po.md",
-  };
-
-  function falaPara(s) {
-    switch (s.estado) {
-      case "aguardando": return { texto: "Me conta a ideia no terminal", tipo: "info" };
-      case "pensando": return { texto: "Listando funcionalidades", tipo: "pensa", pontos: true };
-      case "escrevendo": return { texto: "Escrevendo as user stories", tipo: "info", pontos: true };
-      case "revisando": return { texto: "Refazendo: " + (s.motivo || "formato"), tipo: "alerta" };
-      case "pronto": return { texto: "Backlog pronto!", tipo: "ok" };
-      case "erro": return { texto: "Não consegui validar o backlog", tipo: "erro" };
-      default: return null;
-    }
-  }
-
-  function modoDoQuadro(s) {
-    if (s.estado === "pronto") return "priorizado";
-    if (s.etapa === "backlog") return "listado";
-    if (s.etapa === "descoberta" && s.estado !== "erro") return "rascunho";
-    return "vazio";
-  }
-
-  const $ = id => document.getElementById(id);
-  let sessaoAtual = null, ultimoId = 0, ultimaTentativa = 0, modoAtual = "vazio";
-
-  function aplicar(s) {
-    if (s.sessao !== sessaoAtual) {
-      // main.py reiniciado: limpa o diário e reposiciona sem animação
-      sessaoAtual = s.sessao;
-      ultimoId = 0;
-      ultimaTentativa = 0;
-      $("diario").replaceChildren();
-      localAtual = null;
-    }
-
-    cena.setAttribute("class", `estado-${s.estado}`);
-    $("ideia").textContent = s.ideia ? `Ideia: ${s.ideia}` : "Nenhuma ideia ainda. Digite a sua no terminal do main.py.";
-    const [rotulo, tipo] = ROTULOS[s.estado] || ["…", "info"];
-    $("chip").textContent = rotulo;
-    $("chip").dataset.tipo = tipo;
-    $("etapa").textContent = ETAPAS[s.etapa] || "Esperando a ideia no terminal";
-
-    const n = s.tentativa || 0;
-    $("tentativas").hidden = n === 0;
-    $("tentativas").textContent = `Refez ${n} ${n === 1 ? "vez" : "vezes"} nesta etapa`;
-
-    const local = s.estado === "pensando" || (s.estado === "revisando" && s.etapa === "descoberta") ? "quadro" : "mesa";
-    moverPara(local, true);
-    desenharBalao(falaPara(s), LIMITE_DIREITO - (LOCAIS[local][0] - 12 + 18));
-
-    const modo = modoDoQuadro(s);
-    if (modo !== modoAtual) {
-      quadro.setAttribute("class", `quadro ${modo}`);
-      modoAtual = modo;
-    }
-    $("legenda").hidden = modo !== "priorizado";
-
-    if (s.estado === "revisando" && n !== ultimaTentativa) {
-      corpo.classList.remove("treme");
-      corpo.getBoundingClientRect();
-      corpo.classList.add("treme");
-    }
-    ultimaTentativa = n;
-
-    const novos = (s.eventos || []).filter(e => e.id > ultimoId);
-    if (novos.length) {
-      const lista = $("diario");
-      lista.querySelector(".vazio-diario")?.remove();
-      novos.forEach(e => {
-        const li = document.createElement("li");
-        li.dataset.tipo = e.tipo;
-        const hora = document.createElement("time");
-        hora.textContent = e.hora;
-        const texto = document.createElement("span");
-        texto.textContent = e.texto;
-        li.append(hora, texto);
-        lista.appendChild(li);
+      // Quadro de notas (parede esquerda): 10 notas = 10 funcionalidades
+      const quadro = el("g", { class: "quadro vazio" }, fundo);
+      naParedeEsq(quadro, C.molduraQuadro, 1.2, 5.0, 42, 100);
+      naParedeEsq(quadro, C.cortica, 1.32, 4.88, 46, 96);
+      const PRIORIDADES = ["MUST", "MUST", "MUST", "MUST", "SHOULD", "SHOULD", "SHOULD", "COULD", "COULD", "WONT"];
+      PRIORIDADES.forEach((p, k) => {
+        const coluna = k % 5, linha = Math.floor(k / 5);
+        const j0 = 4.21 - coluna * 0.66;           // esquerda para a direita na tela
+        const topo = 91 - linha * 22;
+        const nota = el("g", { class: "nota", "data-p": p }, quadro);
+        nota.style.setProperty("--i", k);
+        naParedeEsq(nota, null, j0, j0 + 0.5, topo - 16, topo).setAttribute("class", "papel");
+        naParedeEsq(nota, "rgba(42,35,64,.35)", j0 + 0.08, j0 + 0.42, topo - 8, topo - 7);
+        naParedeEsq(nota, "rgba(42,35,64,.35)", j0 + 0.08, j0 + 0.3, topo - 12, topo - 11);
+        naParedeEsq(nota, C.alfinete, j0 + 0.2, j0 + 0.3, topo - 3, topo - 1);
       });
-      ultimoId = novos[novos.length - 1].id;
-      lista.scrollTop = lista.scrollHeight;
-    }
-  }
 
-  let falhasSeguidas = 0;
-  async function consultar() {
-    try {
-      const resposta = await fetch("/status", { cache: "no-store" });
-      if (!resposta.ok) throw new Error(resposta.status);
-      aplicar(await resposta.json());
-      falhasSeguidas = 0;
-      $("aviso").hidden = true;
-    } catch {
-      falhasSeguidas++;
-      if (falhasSeguidas >= 3) $("aviso").hidden = false;
-    } finally {
-      setTimeout(consultar, 800);
-    }
-  }
+      // Planta no canto
+      caixa(fundo, 8.5, 0.5, 0.7, 0.7, 12, 0, C.vaso);
+      const [px, py] = iso(8.85, 0.85, 12);
+      [[-10, -14, 6, 12, 1], [4, -16, 6, 14, 2], [-4, -26, 6, 18, 1], [-14, -24, 6, 8, 2],
+      [9, -28, 6, 10, 1], [-1, -34, 4, 8, 2], [-8, -6, 16, 6, 2]]
+        .forEach(([dx, dy, w, h, c]) => el("rect", { x: px + dx, y: py + dy, width: w, height: h, fill: c === 1 ? C.folha1 : C.folha2 }, fundo));
 
-  // Mede o balão de novo quando a fonte pixel terminar de carregar
-  document.fonts?.ready.then(() => { balaoAtual = ""; });
-  consultar();
-})();
-</script>
+      // ================================================================ PERSONAGENS (sprite em pixel art)
+      // Cada letra é um pixel do sprite de 12 x 24. Cada pixel vira um quadrado 2 x 2 na cena.
+      // O sprite é o mesmo para todos os agentes; muda só a paleta (cabelo, camisa, crachá).
+      const PALETA_PO = {
+        H: "#4a2f22", S: "#f2c4a0", s: "#d9a07a", G: "#2a2340", E: "#2a2340", M: "#b0574a",
+        T: "#2f8f83", t: "#256f66", W: "#f4f1ff", B: "#ffd24a", P: "#3b4a6b", K: "#1f1b2e",
+      };
+      const PALETA_SM = { ...PALETA_PO, H: "#c0762f", T: "#d9622b", t: "#a8481c", B: "#7fd393" };
+
+      const SPRITE = [
+        "...HHHHHH...", "..HHHHHHHH..", ".HHHHHHHHHH.", ".HHSSSSSSHH.",
+        ".HSSSSSSSSH.", ".SGGGSSGGGS.", ".SGEGGGGEGS.", ".SGGGSSGGGS.",
+        ".SSSSSSSSSS.", "..SSSMMSSS..", "...SSSSSS...", "....ssss....",
+        ".TtTTTTTTtT.", "TtTTWTTWTTtT", "TtTTWTTBBTtT", "TtTTTTTBBTtT",
+        "TtTTTTTTTTtT", "SSTTTTTTTTSS", "..tttttttt..", "..PPPPPPPP..",
+        "..PPPPPPPP..", "..PPP..PPP..", "..PPP..PPP..", "..KKK..KKK..",
+      ];
+      // Em qual parte do corpo cada pixel fica (para animar braços e pernas separadamente)
+      const parteDe = (l, c) => {
+        if (l <= 11) return "cabeca";
+        if (l >= 21) return c < 6 ? "perna-esq" : "perna-dir";
+        if (l <= 17 && c <= 1) return "braco-esq";
+        if (l <= 17 && c >= 10) return "braco-dir";
+        return "tronco";
+      };
+      const opaco = (l, c) => l >= 0 && l < SPRITE.length && c >= 0 && c < 12 && SPRITE[l][c] !== ".";
+
+      function criarPersonagem(paleta) {
+        const camada = el("g", { class: "personagem" }, cena);
+        el("ellipse", { cx: 12, cy: 47, rx: 10, ry: 4, fill: "#000", opacity: .18 }, camada);
+        const corpo = el("g", { class: "corpo px" }, camada);
+        const partes = {};
+        ["perna-esq", "perna-dir", "tronco", "braco-esq", "braco-dir", "cabeca"].forEach(nome => {
+          partes[nome] = { contorno: new Set(), pixels: [], g: null };
+        });
+        SPRITE.forEach((linha, l) => [...linha].forEach((ch, c) => {
+          if (ch === ".") return;
+          const parte = partes[parteDe(l, c)];
+          parte.pixels.push([l, c, paleta[ch]]);
+          // Contorno escuro estilo pixel art: vizinhos vazios do sprite inteiro
+          [[l - 1, c], [l + 1, c], [l, c - 1], [l, c + 1]].forEach(([nl, nc]) => {
+            if (!opaco(nl, nc)) parte.contorno.add(`${nl},${nc}`);
+          });
+        }));
+        Object.entries(partes).forEach(([nome, parte]) => {
+          parte.g = el("g", { class: nome }, corpo);
+          parte.contorno.forEach(chave => {
+            const [l, c] = chave.split(",").map(Number);
+            el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: "#1f1b2e" }, parte.g);
+          });
+          parte.pixels.forEach(([l, c, cor]) => el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: cor }, parte.g));
+        });
+        // Pálpebras (piscar) e brilho da tela no rosto
+        const palpebras = el("g", { class: "palpebras" }, partes.cabeca.g);
+        [[6, 3], [6, 8]].forEach(([l, c]) => el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: paleta.S }, palpebras));
+        el("rect", { class: "brilho", x: 4, y: 6, width: 16, height: 14, fill: "#9ff6ff" }, partes.cabeca.g);
+
+        corpo.addEventListener("animationend", () => corpo.classList.remove("treme"));
+        return { camada, corpo, local: null, timer: null };
+      }
+
+      // Os dois são criados antes das mesas: as mesas ficam na frente deles.
+      const po = criarPersonagem(PALETA_PO);
+      const sm = criarPersonagem(PALETA_SM);
+
+      // ================================================================ MESAS
+      // Quem trabalha em cada mesa: PO e SM (laptop aberto). Dev e QA ainda sem agente.
+      const moveis = el("g", { class: "px" }, cena);
+      function mesa(i, j, rotulo, laptopAberto) {
+        const g = el("g", {}, moveis);
+        let led = null;
+        caixa(g, i + 0.05, j + 0.05, 1.9, 0.9, 15, 0, C.movel);
+        caixa(g, i, j, 2, 1, 3, 15, C.tampo);
+        const [tx, ty] = iso(i + 1, j + 0.95, 6);
+        const texto = el("text", { class: "rotulo-mesa", "text-anchor": "middle", transform: `translate(${tx} ${ty}) skewY(26.565)` }, g);
+        texto.textContent = rotulo;
+        if (laptopAberto) {
+          caixa(g, i + 1.05, j + 0.1, 0.9, 0.4, 1.5, 18, C.laptop);
+          poligono(g, C.tampa, iso(i + 1.05, j + 0.5, 19.5), iso(i + 1.95, j + 0.5, 19.5), iso(i + 1.95, j + 0.5, 30.5), iso(i + 1.05, j + 0.5, 30.5));
+          const [lx, ly] = iso(i + 1.5, j + 0.5, 25);
+          led = el("rect", { class: "led", x: lx - 1, y: ly - 1, width: 2, height: 2 }, g);
+          caixa(g, i + 0.3, j + 0.4, 0.28, 0.28, 5, 18, C.caneca);
+        } else {
+          caixa(g, i + 0.55, j + 0.3, 0.9, 0.5, 2.5, 18, C.laptop);
+        }
+        return led;
+      }
+      const ledPO = mesa(3, 6, "PO", true);
+      const ledSM = mesa(6, 6, "SM", true);
+      mesa(3, 8.6, "Dev", false);
+      mesa(6, 8.6, "QA", false);
+
+      // ================================================================ BALÃO DE FALA (camada do topo)
+      const camadaBalao = el("g", { class: "camada-balao" }, cena);
+      const CORES_BALAO = { info: "#fbfaff", pensa: "#fbfaff", alerta: "#ffe7b0", ok: "#d3f5dc", erro: "#ffd0cb" };
+      let balaoAtual = "";
+
+      const LIMITE_DIREITO = 511;  // borda direita do viewBox, com folga
+
+      function desenharBalao(fala, larguraMax) {
+        const chave = JSON.stringify([fala, larguraMax]);
+        if (chave === balaoAtual) return;
+        balaoAtual = chave;
+        camadaBalao.replaceChildren();
+        if (!fala) return;
+
+        const g = el("g", { class: "px" }, camadaBalao);
+        const fundoG = el("g", {}, g);
+        const bx = 18, by = -26, h = 20;
+        const texto = el("text", { class: "balao-texto", "text-anchor": "middle", y: by + 14.5 }, g);
+        const conteudo = document.createTextNode(fala.texto);
+        texto.appendChild(conteudo);
+        if (fala.pontos) {
+          ["p1", "p2", "p3"].forEach(p => { el("tspan", { class: `ponto ${p}` }, texto).textContent = "."; });
+        }
+        const medir = () => {
+          let l = 0;
+          try { l = texto.getComputedTextLength(); } catch { /* sem layout ainda */ }
+          return l || (conteudo.data.length + (fala.pontos ? 3 : 0)) * 7;
+        };
+        let largura = medir();
+        // Encurta o texto até o balão caber na sala
+        let corte = fala.texto.length;
+        while (largura + 18 > larguraMax && corte > 8) {
+          corte--;
+          conteudo.data = fala.texto.slice(0, corte).trimEnd() + "…";
+          largura = medir();
+        }
+        const w = Math.round(largura + 18);
+        texto.setAttribute("x", bx + w / 2);
+
+        const escuro = "#2a2340", claro = CORES_BALAO[fala.tipo] || CORES_BALAO.info;
+        el("rect", { x: bx, y: by + 2, width: w, height: h - 4, fill: escuro }, fundoG);
+        el("rect", { x: bx + 2, y: by, width: w - 4, height: h, fill: escuro }, fundoG);
+        el("rect", { x: bx + 2, y: by + 2, width: w - 4, height: h - 4, fill: claro }, fundoG);
+        if (fala.tipo === "pensa") {
+          el("rect", { x: bx + 4, y: by + h + 2, width: 6, height: 6, fill: escuro }, fundoG);
+          el("rect", { x: bx + 6, y: by + h + 4, width: 2, height: 2, fill: claro }, fundoG);
+          el("rect", { x: bx, y: by + h + 10, width: 4, height: 4, fill: escuro }, fundoG);
+        } else {
+          poligono(fundoG, escuro, [bx + 4, by + h - 2], [bx + 12, by + h - 2], [bx + 2, by + h + 8]);
+          poligono(fundoG, claro, [bx + 6, by + h - 3], [bx + 10, by + h - 3], [bx + 4.5, by + h + 3.5]);
+        }
+      }
+
+      // ================================================================ MOVIMENTO
+      const LOCAIS = {
+        quadro: iso(0.9, 3.0),
+        "mesa-po": iso(3.6, 5.4),
+        "mesa-sm": iso(6.6, 5.4),
+      };
+      const destino = local => {
+        const [x, y] = LOCAIS[local];
+        return `translate(${x - 12}px, ${y - 47}px)`;
+      };
+
+      function moverPara(p, local, comTransicao) {
+        if (local === p.local) return;
+        const t = destino(local);
+        if (!comTransicao || p.local === null) {
+          p.camada.classList.add("sem-transicao");
+          p.camada.style.transform = t;
+          p.camada.getBoundingClientRect();
+          p.camada.classList.remove("sem-transicao");
+        } else {
+          p.camada.classList.add("andando");
+          p.camada.style.transform = t;
+          clearTimeout(p.timer);
+          p.timer = setTimeout(() => p.camada.classList.remove("andando"), 1450);
+        }
+        p.local = local;
+      }
+
+      // O balão acompanha o personagem que está falando
+      let localBalao = null;
+      function moverBalao(local) {
+        if (local === localBalao) return;
+        const t = destino(local);
+        if (localBalao === null) {
+          camadaBalao.classList.add("sem-transicao");
+          camadaBalao.style.transform = t;
+          camadaBalao.getBoundingClientRect();
+          camadaBalao.classList.remove("sem-transicao");
+        } else {
+          camadaBalao.style.transform = t;
+        }
+        localBalao = local;
+      }
+
+      moverPara(po, "mesa-po", false);
+      moverPara(sm, "mesa-sm", false);
+
+      // ================================================================ ESTADO VINDO DO main.py
+      const ROTULOS = {
+        aguardando: ["Aguardando ideia", "info"],
+        pensando: ["Pensando", "info"],
+        escrevendo: ["Escrevendo", "info"],
+        revisando: ["Refazendo", "alerta"],
+        pronto: ["Squad pronta", "ok"],
+        erro: ["Parou com erro", "erro"],
+      };
+      const ETAPAS = {
+        descoberta: "Etapa 1 de 4: PO descobrindo as funcionalidades",
+        backlog: "Etapa 2 de 4: PO escrevendo as user stories",
+        tarefas: "Etapa 3 de 4: Scrum Master quebrando em tarefas",
+        sprint: "Etapa 4 de 4: Scrum Master montando as sprints",
+        fim: "Concluído: resultado salvo em output/squad.md",
+      };
+
+      // Quem está trabalhando em cada etapa (no fim, comemoram juntos)
+      function ativosPara(s) {
+        if (s.estado === "pronto" || s.etapa === "fim") return [po, sm];
+        if (s.etapa === "tarefas" || s.etapa === "sprint") return [sm];
+        return [po];
+      }
+
+      function falaPara(s) {
+        switch (s.estado) {
+          case "aguardando": return { texto: "Me conta a ideia no terminal", tipo: "info" };
+          case "pensando": return { texto: "Listando funcionalidades", tipo: "pensa", pontos: true };
+          case "escrevendo":
+            if (s.etapa === "tarefas") return { texto: "Quebrando em tarefas", tipo: "info", pontos: true };
+            if (s.etapa === "sprint") return { texto: "Montando as sprints", tipo: "info", pontos: true };
+            return { texto: "Escrevendo as user stories", tipo: "info", pontos: true };
+          case "revisando": return { texto: "Refazendo: " + (s.motivo || "formato"), tipo: "alerta" };
+          case "pronto": return { texto: "Squad pronta!", tipo: "ok" };
+          case "erro": return { texto: "Não consegui validar a saída", tipo: "erro" };
+          default: return null;
+        }
+      }
+
+      function modoDoQuadro(s) {
+        // Depois do backlog aprovado, o quadro fica priorizado até o fim
+        if (s.estado === "pronto" || s.etapa === "tarefas" || s.etapa === "sprint") return "priorizado";
+        if (s.etapa === "backlog") return "listado";
+        if (s.etapa === "descoberta" && s.estado !== "erro") return "rascunho";
+        return "vazio";
+      }
+
+      const $ = id => document.getElementById(id);
+      let sessaoAtual = null, ultimoId = 0, ultimaTentativa = 0, modoAtual = "vazio";
+
+      function aplicar(s) {
+        if (s.sessao !== sessaoAtual) {
+          // main.py reiniciado: limpa o diário e reposiciona sem animação
+          sessaoAtual = s.sessao;
+          ultimoId = 0;
+          ultimaTentativa = 0;
+          $("diario").replaceChildren();
+          po.local = null;
+          sm.local = null;
+          localBalao = null;
+        }
+
+        const ativos = ativosPara(s);
+        const lider = ativos[ativos.length - 1];
+
+        cena.setAttribute("class", `estado-${s.estado}`);
+        [po, sm].forEach(p => p.camada.classList.toggle("ativo", ativos.includes(p)));
+        ledPO.classList.toggle("ativo", ativos.includes(po));
+        ledSM.classList.toggle("ativo", ativos.includes(sm));
+
+        $("ideia").textContent = s.ideia ? `Ideia: ${s.ideia}` : "Nenhuma ideia ainda. Digite a sua no terminal do main.py.";
+        $("nome").textContent = ativos.length > 1 ? "Squad" : (lider === sm ? "Scrum Master" : "Product Owner");
+        const [rotulo, tipo] = ROTULOS[s.estado] || ["…", "info"];
+        $("chip").textContent = rotulo;
+        $("chip").dataset.tipo = tipo;
+        $("etapa").textContent = ETAPAS[s.etapa] || "Esperando a ideia no terminal";
+
+        const n = s.tentativa || 0;
+        $("tentativas").hidden = n === 0;
+        $("tentativas").textContent = `Refez ${n} ${n === 1 ? "vez" : "vezes"} nesta etapa`;
+
+        // O PO vai ao quadro na descoberta; o SM fica sempre na mesa dele
+        const poNoQuadro = s.estado === "pensando" || (s.estado === "revisando" && s.etapa === "descoberta");
+        moverPara(po, poNoQuadro ? "quadro" : "mesa-po", true);
+        moverPara(sm, "mesa-sm", true);
+
+        moverBalao(lider.local);
+        desenharBalao(falaPara(s), LIMITE_DIREITO - (LOCAIS[lider.local][0] - 12 + 18));
+
+        const modo = modoDoQuadro(s);
+        if (modo !== modoAtual) {
+          quadro.setAttribute("class", `quadro ${modo}`);
+          modoAtual = modo;
+        }
+        $("legenda").hidden = modo !== "priorizado";
+
+        if (s.estado === "revisando" && n !== ultimaTentativa) {
+          ativos.forEach(p => {
+            p.corpo.classList.remove("treme");
+            p.corpo.getBoundingClientRect();
+            p.corpo.classList.add("treme");
+          });
+        }
+        ultimaTentativa = n;
+
+        const novos = (s.eventos || []).filter(e => e.id > ultimoId);
+        if (novos.length) {
+          const lista = $("diario");
+          lista.querySelector(".vazio-diario")?.remove();
+          novos.forEach(e => {
+            const li = document.createElement("li");
+            li.dataset.tipo = e.tipo;
+            const hora = document.createElement("time");
+            hora.textContent = e.hora;
+            const texto = document.createElement("span");
+            texto.textContent = e.texto;
+            li.append(hora, texto);
+            lista.appendChild(li);
+          });
+          ultimoId = novos[novos.length - 1].id;
+          lista.scrollTop = lista.scrollHeight;
+        }
+      }
+
+      let falhasSeguidas = 0;
+      async function consultar() {
+        try {
+          const resposta = await fetch("/status", { cache: "no-store" });
+          if (!resposta.ok) throw new Error(resposta.status);
+          aplicar(await resposta.json());
+          falhasSeguidas = 0;
+          $("aviso").hidden = true;
+        } catch {
+          falhasSeguidas++;
+          if (falhasSeguidas >= 3) $("aviso").hidden = false;
+        } finally {
+          setTimeout(consultar, 800);
+        }
+      }
+
+      // Mede o balão de novo quando a fonte pixel terminar de carregar
+      document.fonts?.ready.then(() => { balaoAtual = ""; });
+      consultar();
+    })();
+  </script>
 </body>
+
 </html>
