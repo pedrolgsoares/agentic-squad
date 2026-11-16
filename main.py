@@ -1,17 +1,19 @@
 # main.py
-# Teste da Squad (PO + Scrum Master) com LLM Local via Ollama
+# Teste da Squad (PO + Scrum Master + Arquiteto) com LLM Local via Ollama
 # Rode: python main.py
 #
 # Fluxo:
 #   ideia -> validacao de entrada -> checagem de tamanho
 #         -> DESCOBERTA (guardrail) -> BACKLOG (guardrail)      [PO]
 #         -> TAREFAS (guardrail)    -> SPRINT (guardrail)       [Scrum Master]
+#         -> STACK (guardrail)      -> CONTRATO (guardrail)     [Arquiteto]
 #         -> output/squad.md
 
 import os
 from crewai import Crew, Task, LLM
 from agents.po_agent import create_po_agent, DISCOVERY_PROMPT, BACKLOG_PROMPT
 from agents.scrum_agent import create_scrum_agent, TASKS_PROMPT, SPRINT_PROMPT
+from agents.architect_agent import create_architect_agent, STACK_PROMPT, CONTRACT_PROMPT
 from configs.guardrails import (
     validar_ideia,
     checar_tamanho_prompt,
@@ -19,6 +21,8 @@ from configs.guardrails import (
     guardrail_backlog,
     guardrail_tarefas,
     guardrail_sprint,
+    guardrail_stack,
+    guardrail_contrato,
 )
 
 from ui_server import iniciar_sala, observar_guardrail
@@ -39,11 +43,16 @@ llm = LLM(
 
 IDEIA_PADRAO = "App de controle de gastos pessoais com categorias e relatorios mensais"
 
-# [SALA] Depois que cada etapa e aprovada: mensagem do diario e proxima etapa
+# [SALA] Depois que cada etapa e aprovada: mensagem do diario e proxima etapa.
+# CORRECAO: faltava "sprint" -> "stack". Sem ela a sala ficava presa em "sprint"
+# e o Scrum Master aparecia refazendo os erros do Arquiteto.
+# "contrato" nao entra aqui: depois dele o main() publica a etapa "fim".
 PROXIMA_ETAPA = {
     "descoberta": ("Funcionalidades aprovadas. Começando as user stories.", "backlog"),
     "backlog": ("Backlog aprovado. Scrum Master quebrando em tarefas.", "tarefas"),
     "tarefas": ("Tarefas aprovadas. Montando as sprints.", "sprint"),
+    "sprint": ("Sprints aprovadas. Arquiteto escolhendo a stack.", "stack"),
+    "stack": ("Stack aprovada. Arquiteto montando o contrato técnico.", "contrato"),
 }
 
 
@@ -68,7 +77,7 @@ def esperar_enter():
 
 def main():
     print("=" * 60)
-    print("AGENTIC SQUAD - TESTE DO PO + SCRUM MASTER")
+    print("AGENTIC SQUAD - PO + SCRUM MASTER + ARQUITETO")
     print("LLM Local: Ollama + Llama 3.2")
     print("=" * 60)
     print("")
@@ -82,12 +91,15 @@ def main():
     descricao_backlog = BACKLOG_PROMPT.format(idea=idea)
     descricao_tarefas = TASKS_PROMPT.format(idea=idea)
     descricao_sprint = SPRINT_PROMPT.format(idea=idea)
-
+    descricao_stack = STACK_PROMPT.format(idea=idea)
+    descricao_contrato = CONTRACT_PROMPT.format(idea=idea)
     try:
         checar_tamanho_prompt(descricao_descoberta)
         checar_tamanho_prompt(descricao_backlog)
         checar_tamanho_prompt(descricao_tarefas)
         checar_tamanho_prompt(descricao_sprint)
+        checar_tamanho_prompt(descricao_stack)
+        checar_tamanho_prompt(descricao_contrato)
     except ValueError as erro:
         print(f"\n{erro}")
         sala.publicar(str(erro), tipo="erro", estado="erro", ideia=idea)
@@ -102,8 +114,11 @@ def main():
     # 3. CRIA OS AGENTES
     po_agent = create_po_agent(llm)
     scrum_agent = create_scrum_agent(llm)
+    architect_agent = create_architect_agent(llm)
 
     # 4. CRIA AS TAREFAS (prompt chaining)
+    # A etapa mostrada na sala vem do task_callback + PROXIMA_ETAPA,
+    # entao o observar_guardrail continua com 2 argumentos.
     # --- PO ---
     descoberta_task = Task(
         description=descricao_descoberta,
@@ -140,6 +155,23 @@ def main():
         guardrail=observar_guardrail(guardrail_sprint, sala),
     )
 
+    # --- Arquiteto ---
+    stack_task = Task(
+        description=descricao_stack,
+        expected_output="Stack (linguagem, framework, banco, interface, justificativa) e 5 modulos",
+        agent=architect_agent,
+        context=[tarefas_task],  # precisa das tarefas T01.1... com descricao
+        guardrail=observar_guardrail(guardrail_stack, sala),
+    )
+
+    contrato_task = Task(
+        description=descricao_contrato,
+        expected_output="Entidades e endpoints ligados aos modulos e aos codigos de tarefa",
+        agent=architect_agent,
+        context=[tarefas_task, stack_task],
+        guardrail=observar_guardrail(guardrail_contrato, sala),
+    )
+
     def ao_concluir_tarefa(output):
         # [SALA] Chamado pelo CrewAI depois de cada tarefa aprovada
         etapa = sala.get("etapa")
@@ -150,10 +182,10 @@ def main():
                 tipo="ok", estado="escrevendo", etapa=proxima, tentativa=0, motivo="",
             )
 
-    # 5. MONTA O CREW COM O PO E O SCRUM MASTER
+    # 5. MONTA O CREW COM O PO, O SCRUM MASTER E O ARQUITETO
     crew = Crew(
-        agents=[po_agent, scrum_agent],
-        tasks=[descoberta_task, backlog_task, tarefas_task, sprint_task],
+        agents=[po_agent, scrum_agent, architect_agent],
+        tasks=[descoberta_task, backlog_task, tarefas_task, sprint_task, stack_task, contrato_task],
         verbose=True,
         task_callback=ao_concluir_tarefa,  # [SALA]
     )
@@ -165,16 +197,26 @@ def main():
         # Se o guardrail esgotar as tentativas, o CrewAI levanta excecao
         print(f"\nA squad nao conseguiu gerar um resultado valido: {erro}")
         print("Tente detalhar mais a ideia ou rodar novamente.")
+        # [SALA] Mostra "Parou com erro" no agente da etapa atual, em vez de a
+        # pagina ficar congelada em "Refazendo" e cair quando o script termina
+        sala.publicar(
+            f"Parou na etapa {sala.get('etapa')}: {erro}",
+            tipo="erro", estado="erro",
+        )
+        esperar_enter()
         return
 
-    # 6. SALVA O RESULTADO (as quatro etapas, nao so a ultima)
+    # 6. SALVA O RESULTADO (as seis etapas, nao so a ultima)
     documento = "\n\n".join(t.raw for t in result.tasks_output)
 
     os.makedirs("output", exist_ok=True)
     with open("output/squad.md", "w", encoding="utf-8") as f:
         f.write(documento)
 
-    sala.publicar("Backlog e sprints salvos em output/squad.md", tipo="ok", estado="pronto", etapa="fim")
+    sala.publicar(
+        "Backlog, sprints e contrato técnico salvos em output/squad.md",
+        tipo="ok", estado="pronto", etapa="fim",
+    )
 
     print("\n" + "=" * 60)
     print("PRONTO! Resultado salvo em: output/squad.md")

@@ -535,8 +535,8 @@
   <main class="layout">
     <section class="palco">
       <svg id="cena" viewBox="135 15 380 315" role="img" aria-labelledby="cena-titulo">
-        <title id="cena-titulo">Sala isométrica com o Product Owner, o Scrum Master, um quadro de notas e mesas vazias
-          para os próximos agentes</title>
+        <title id="cena-titulo">Sala isométrica com o Product Owner, o Scrum Master, o Arquiteto, um quadro de notas e
+          mesas vazias para os próximos agentes</title>
       </svg>
     </section>
 
@@ -655,9 +655,9 @@
       poligono(fundo, C.bordaEsq, iso(-E, N), iso(N, N), iso(N, N, -8), iso(-E, N, -8));
       poligono(fundo, C.bordaDir, iso(N, -E), iso(N, N), iso(N, N, -8), iso(N, -E, -8));
 
-      // Tapete sob as mesas
-      poligono(fundo, C.tapeteBorda, iso(2.1, 5.2), iso(8.9, 5.2), iso(8.9, 9.9), iso(2.1, 9.9));
-      poligono(fundo, C.tapete, iso(2.3, 5.4), iso(8.7, 5.4), iso(8.7, 9.7), iso(2.3, 9.7));
+      // Tapete sob as mesas (mais largo: a segunda fileira tem 3 mesas)
+      poligono(fundo, C.tapeteBorda, iso(1.8, 5.2), iso(9.5, 5.2), iso(9.5, 9.9), iso(1.8, 9.9));
+      poligono(fundo, C.tapete, iso(2.0, 5.4), iso(9.3, 5.4), iso(9.3, 9.7), iso(2.0, 9.7));
 
       // Quadro de notas (parede esquerda): 10 notas = 10 funcionalidades
       const quadro = el("g", { class: "quadro vazio" }, fundo);
@@ -691,6 +691,7 @@
         T: "#2f8f83", t: "#256f66", W: "#f4f1ff", B: "#ffd24a", P: "#3b4a6b", K: "#1f1b2e",
       };
       const PALETA_SM = { ...PALETA_PO, H: "#c0762f", T: "#d9622b", t: "#a8481c", B: "#7fd393" };
+      const PALETA_ARQ = { ...PALETA_PO, H: "#8a8fa8", T: "#6b57c9", t: "#4f3fa0", B: "#f5ad66" };
 
       const SPRITE = [
         "...HHHHHH...", "..HHHHHHHH..", ".HHHHHHHHHH.", ".HHSSSSSSHH.",
@@ -710,13 +711,13 @@
       };
       const opaco = (l, c) => l >= 0 && l < SPRITE.length && c >= 0 && c < 12 && SPRITE[l][c] !== ".";
 
-      function criarPersonagem(paleta) {
+      function criarPersonagem(paleta, nome) {
         const camada = el("g", { class: "personagem" }, cena);
         el("ellipse", { cx: 12, cy: 47, rx: 10, ry: 4, fill: "#000", opacity: .18 }, camada);
         const corpo = el("g", { class: "corpo px" }, camada);
         const partes = {};
-        ["perna-esq", "perna-dir", "tronco", "braco-esq", "braco-dir", "cabeca"].forEach(nome => {
-          partes[nome] = { contorno: new Set(), pixels: [], g: null };
+        ["perna-esq", "perna-dir", "tronco", "braco-esq", "braco-dir", "cabeca"].forEach(parte => {
+          partes[parte] = { contorno: new Set(), pixels: [], g: null };
         });
         SPRITE.forEach((linha, l) => [...linha].forEach((ch, c) => {
           if (ch === ".") return;
@@ -727,8 +728,8 @@
             if (!opaco(nl, nc)) parte.contorno.add(`${nl},${nc}`);
           });
         }));
-        Object.entries(partes).forEach(([nome, parte]) => {
-          parte.g = el("g", { class: nome }, corpo);
+        Object.entries(partes).forEach(([id, parte]) => {
+          parte.g = el("g", { class: id }, corpo);
           parte.contorno.forEach(chave => {
             const [l, c] = chave.split(",").map(Number);
             el("rect", { x: c * 2, y: l * 2, width: 2, height: 2, fill: "#1f1b2e" }, parte.g);
@@ -741,15 +742,18 @@
         el("rect", { class: "brilho", x: 4, y: 6, width: 16, height: 14, fill: "#9ff6ff" }, partes.cabeca.g);
 
         corpo.addEventListener("animationend", () => corpo.classList.remove("treme"));
-        return { camada, corpo, local: null, timer: null };
+        return { nome, camada, corpo, local: null, timer: null };
       }
 
-      // Os dois são criados antes das mesas: as mesas ficam na frente deles.
-      const po = criarPersonagem(PALETA_PO);
-      const sm = criarPersonagem(PALETA_SM);
+      // Os três são criados antes das mesas: as mesas ficam na frente deles.
+      const po = criarPersonagem(PALETA_PO, "Product Owner");
+      const sm = criarPersonagem(PALETA_SM, "Scrum Master");
+      const arq = criarPersonagem(PALETA_ARQ, "Arquiteto");
+      const TODOS = [po, sm, arq];
 
       // ================================================================ MESAS
-      // Quem trabalha em cada mesa: PO e SM (laptop aberto). Dev e QA ainda sem agente.
+      // PO, SM e Arq têm laptop aberto. Dev e QA ainda sem agente.
+      // Fileira de trás (j = 6): PO e SM. Fileira da frente (j = 8.6): Arq, Dev e QA.
       const moveis = el("g", { class: "px" }, cena);
       function mesa(i, j, rotulo, laptopAberto) {
         const g = el("g", {}, moveis);
@@ -772,8 +776,9 @@
       }
       const ledPO = mesa(3, 6, "PO", true);
       const ledSM = mesa(6, 6, "SM", true);
-      mesa(3, 8.6, "Dev", false);
-      mesa(6, 8.6, "QA", false);
+      const ledARQ = mesa(2, 8.6, "Arq", true);
+      mesa(4.6, 8.6, "Dev", false);
+      mesa(7.2, 8.6, "QA", false);
 
       // ================================================================ BALÃO DE FALA (camada do topo)
       const camadaBalao = el("g", { class: "camada-balao" }, cena);
@@ -829,10 +834,12 @@
       }
 
       // ================================================================ MOVIMENTO
+      // Cada agente fica atrás da própria mesa (i + 0.6, j - 0.6).
       const LOCAIS = {
         quadro: iso(0.9, 3.0),
         "mesa-po": iso(3.6, 5.4),
         "mesa-sm": iso(6.6, 5.4),
+        "mesa-arq": iso(2.6, 8.0),
       };
       const destino = local => {
         const [x, y] = LOCAIS[local];
@@ -874,6 +881,7 @@
 
       moverPara(po, "mesa-po", false);
       moverPara(sm, "mesa-sm", false);
+      moverPara(arq, "mesa-arq", false);
 
       // ================================================================ ESTADO VINDO DO main.py
       const ROTULOS = {
@@ -885,16 +893,22 @@
         erro: ["Parou com erro", "erro"],
       };
       const ETAPAS = {
-        descoberta: "Etapa 1 de 4: PO descobrindo as funcionalidades",
-        backlog: "Etapa 2 de 4: PO escrevendo as user stories",
-        tarefas: "Etapa 3 de 4: Scrum Master quebrando em tarefas",
-        sprint: "Etapa 4 de 4: Scrum Master montando as sprints",
+        descoberta: "Etapa 1 de 6: PO descobrindo as funcionalidades",
+        backlog: "Etapa 2 de 6: PO escrevendo as user stories",
+        tarefas: "Etapa 3 de 6: Scrum Master quebrando em tarefas",
+        sprint: "Etapa 4 de 6: Scrum Master montando as sprints",
+        stack: "Etapa 5 de 6: Arquiteto escolhendo a stack",
+        contrato: "Etapa 6 de 6: Arquiteto montando o contrato técnico",
         fim: "Concluído: resultado salvo em output/squad.md",
       };
 
+      // Etapas em que o quadro de notas já mostra as prioridades do backlog
+      const ETAPAS_PRIORIZADAS = ["tarefas", "sprint", "stack", "contrato"];
+
       // Quem está trabalhando em cada etapa (no fim, comemoram juntos)
       function ativosPara(s) {
-        if (s.estado === "pronto" || s.etapa === "fim") return [po, sm];
+        if (s.estado === "pronto" || s.etapa === "fim") return TODOS;
+        if (s.etapa === "stack" || s.etapa === "contrato") return [arq];
         if (s.etapa === "tarefas" || s.etapa === "sprint") return [sm];
         return [po];
       }
@@ -906,6 +920,8 @@
           case "escrevendo":
             if (s.etapa === "tarefas") return { texto: "Quebrando em tarefas", tipo: "info", pontos: true };
             if (s.etapa === "sprint") return { texto: "Montando as sprints", tipo: "info", pontos: true };
+            if (s.etapa === "stack") return { texto: "Escolhendo a stack", tipo: "info", pontos: true };
+            if (s.etapa === "contrato") return { texto: "Desenhando os endpoints", tipo: "info", pontos: true };
             return { texto: "Escrevendo as user stories", tipo: "info", pontos: true };
           case "revisando": return { texto: "Refazendo: " + (s.motivo || "formato"), tipo: "alerta" };
           case "pronto": return { texto: "Squad pronta!", tipo: "ok" };
@@ -916,7 +932,7 @@
 
       function modoDoQuadro(s) {
         // Depois do backlog aprovado, o quadro fica priorizado até o fim
-        if (s.estado === "pronto" || s.etapa === "tarefas" || s.etapa === "sprint") return "priorizado";
+        if (s.estado === "pronto" || ETAPAS_PRIORIZADAS.includes(s.etapa)) return "priorizado";
         if (s.etapa === "backlog") return "listado";
         if (s.etapa === "descoberta" && s.estado !== "erro") return "rascunho";
         return "vazio";
@@ -932,8 +948,7 @@
           ultimoId = 0;
           ultimaTentativa = 0;
           $("diario").replaceChildren();
-          po.local = null;
-          sm.local = null;
+          TODOS.forEach(p => { p.local = null; });
           localBalao = null;
         }
 
@@ -941,12 +956,13 @@
         const lider = ativos[ativos.length - 1];
 
         cena.setAttribute("class", `estado-${s.estado}`);
-        [po, sm].forEach(p => p.camada.classList.toggle("ativo", ativos.includes(p)));
+        TODOS.forEach(p => p.camada.classList.toggle("ativo", ativos.includes(p)));
         ledPO.classList.toggle("ativo", ativos.includes(po));
         ledSM.classList.toggle("ativo", ativos.includes(sm));
+        ledARQ.classList.toggle("ativo", ativos.includes(arq));
 
         $("ideia").textContent = s.ideia ? `Ideia: ${s.ideia}` : "Nenhuma ideia ainda. Digite a sua no terminal do main.py.";
-        $("nome").textContent = ativos.length > 1 ? "Squad" : (lider === sm ? "Scrum Master" : "Product Owner");
+        $("nome").textContent = ativos.length > 1 ? "Squad" : lider.nome;
         const [rotulo, tipo] = ROTULOS[s.estado] || ["…", "info"];
         $("chip").textContent = rotulo;
         $("chip").dataset.tipo = tipo;
@@ -956,10 +972,11 @@
         $("tentativas").hidden = n === 0;
         $("tentativas").textContent = `Refez ${n} ${n === 1 ? "vez" : "vezes"} nesta etapa`;
 
-        // O PO vai ao quadro na descoberta; o SM fica sempre na mesa dele
+        // O PO vai ao quadro na descoberta; SM e Arq ficam sempre nas mesas deles
         const poNoQuadro = s.estado === "pensando" || (s.estado === "revisando" && s.etapa === "descoberta");
         moverPara(po, poNoQuadro ? "quadro" : "mesa-po", true);
         moverPara(sm, "mesa-sm", true);
+        moverPara(arq, "mesa-arq", true);
 
         moverBalao(lider.local);
         desenharBalao(falaPara(s), LIMITE_DIREITO - (LOCAIS[lider.local][0] - 12 + 18));
