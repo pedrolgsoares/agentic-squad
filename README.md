@@ -57,7 +57,7 @@ No final, abre o `squad.md` gerado.
 ## Roadmap
 
 - [x] Checkpoint 1: PO + Scrum Master
-- [ ] Checkpoint 2: Arquiteto - decide a stack e o contrato da API
+- [x] Checkpoint 2: Arquiteto - decide a stack e o contrato da API
 - [ ] Checkpoint 3: Dev Front - gera projeto/index.html, style.css, app.js
 - [ ] Checkpoint 4: Dev Back - gera backend/app.py com API Flask
 - [ ] Checkpoint 5: QA - valida o codigo gerado e o squad.md
