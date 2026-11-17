@@ -2,8 +2,6 @@
 
 MultiAgent squad que simula um time Scrum completo: PO, Scrum Master, Dev, QA e Arquiteto.
 
-Versao atual: **Checkpoint 1 - PO + Scrum Master funcionando.**
-
 Feito com CrewAI + llama3.2 3B rodando local no Ollama, com prompt chaining e guardrails que corrigem o modelo automaticamente.
 
 ## Como funciona hoje
@@ -66,7 +64,7 @@ No final, abre o `squad.md` gerado.
 
 Porque ele e pequeno e roda local, mas se perde em saidas longas. Por isso o projeto usa:
 
-- **Prompt Chaining:** PO em 2 etapas, Scrum em 2 etapas, nunca tudo de uma vez.
+- **Prompt Chaining:** PO em 2 etapas, Scrum em 2 etapas, Arquiteto em 2 etapas, nunca tudo de uma vez.
 - **Regras de formato fixas:** o modelo so copia o formato, nao inventa.
 - **Guardrails em codigo:** regex + validacao em Python, nao depende do modelo se auto-corrigir.
 
